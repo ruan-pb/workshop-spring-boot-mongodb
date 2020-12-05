@@ -1,7 +1,7 @@
 package WorkShopMongoDB.resource;
 
+import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import WorkShopMongoDB.domain.User;
 import WorkShopMongoDB.dto.UserDTO;
@@ -37,11 +38,20 @@ public class UserResource {
 		return ResponseEntity.ok().body(new UserDTO(user));
 	}
 	@PostMapping
- 	public ResponseEntity<Void> insert(@RequestBody User user) {
-		User user = service.findById(id);
+ 	public ResponseEntity<Void> insert(@RequestBody UserDTO userDto) {
+		User user = service.fromDTO(userDto);
+		user = service.insert(user);
 		
-		return ResponseEntity.ok().body(new UserDTO(user));
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(userDto.getId()).toUri();
+		return ResponseEntity.created(uri).build();
 	}
+	@RequestMapping(value="/{id}", method=RequestMethod.DELETE)
+ 	public ResponseEntity<Void> Delete(@PathVariable String id) {
+		service.delete(id);
+		
+		return ResponseEntity.noContent().build();
+	}
+	
 	
 	
 	
